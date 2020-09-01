@@ -1,15 +1,13 @@
 const form = document.querySelector("form");
 const input = document.querySelector(".input");
+input.placeholder = "Enter your task here: ";
+
 const submitBtn = document.querySelector(".submit");
 const list = document.querySelector(".to-do-list");
-
-
-// const deleteItem = document.createElement("span");
-// deleteItem.classList.add("delete");
-// deleteItem.textContent = "X";
+let newTask;
 let toDoList = [];
+let toDoListCurrTask = 0;
 let liId = 0;
-
 
 //when submiting a task -> prevent the default behavior of submit and run addTaskToList
 form.addEventListener("submit", activateAddTaskToList);
@@ -20,11 +18,10 @@ function activateAddTaskToList(event) {
 }
 
 //create
+
 function createTask() {
-    console.log("hi");
-    input.placeholder = "Enter your task here: ";
     const date = new Date();
-    const newTask = {};
+    newTask = {};
     if (!input.value) {
         return;
     }
@@ -34,7 +31,11 @@ function createTask() {
     newTask.dateAdded = date;
     toDoList.push(newTask);
 
-    // console.log(toDoList);
+    renderTask(toDoList[toDoListCurrTask]);
+}
+
+//render/read
+function renderTask() {
     
     //create new li with the input of the new task the user wrote.
     //for each li, create a new checkbox element and edit + trash elements
@@ -62,7 +63,7 @@ function createTask() {
     item.appendChild(trash);
     list.appendChild(item);
 
-    //creating update input field for li
+    //creating the update-input field and submit-button for the li
     const updateForm = document.createElement("form");
     const updateInputField = document.createElement("input");
     updateInputField.style.display = "none";
@@ -85,18 +86,13 @@ function createTask() {
         }
     });
 
+    toDoListCurrTask++;
+
     update.addEventListener("click", updateTask);
     // console.log(update.parentElement.textContent);
-
     trash.addEventListener("click", removeTask);
 
     input.value = "";
-}
-
-//read
-function renderTask() {
-
-
 }
 
 //update
@@ -128,32 +124,3 @@ function removeTask(event) {
     let el = document.getElementById(event.currentTarget.parentElement.id);
     el.remove();
 }
-
-
-
-
-// function updateEventListener() {
-//     input.placeholder = "Edit your task: ";
-//     //removing previous event listener temporarly
-//     form.removeEventListener("click", activateAddTaskToList);
-//     //adding new event listener temporarly, changing the purpose of the submit button to edit an existing input
-//     form.addEventListener("click", callUpdateTask);
-// }
-
-// //a function called by the changed submit button, calling the function that enable editing an existing input
-// function callUpdateTask(event) {
-//     event.preventDefault();
-//     updateTask();
-// }
-
-// //updating an existing input
-// function updateTask(event) {
-//     input.textContent = input.value;
-//     input.placeholder = "Enter your task here: ";
-
-//     form.removeEventListener("click", callUpdateTask);
-
-//     //adding previous event listener back
-//     form.addEventListener("click", activateAddTaskToList);
-// }
-
