@@ -1,3 +1,4 @@
+
 const form = document.querySelector("form");
 const input = document.querySelector(".input");
 input.placeholder = "Enter your task here: ";
@@ -8,6 +9,9 @@ let newTask;
 let toDoList = [];
 let toDoListCurrTask = 0;
 let liId = 0;
+let i = 0;
+
+renderExistingTasks();
 
 //when submiting a task -> prevent the default behavior of submit and run addTaskToList
 form.addEventListener("submit", activateAddTaskToList);
@@ -31,20 +35,43 @@ function createTask() {
     newTask.dateAdded = date;
     toDoList.push(newTask);
 
+    localStorage.setItem("to-do-list", JSON.stringify(toDoList));
+
     renderTask(toDoList[toDoListCurrTask]);
+}
+
+function renderExistingTasks() {
+    const todos = localStorage.getItem("to-do-list");
+    toDoParsed = JSON.parse(todos) || [];
+    console.log(toDoParsed);
+
+    for (i = 0; i < toDoParsed.length; i++) {
+
+        if (toDoParsed[i]) {
+            renderTask();
+        }
+    }
 }
 
 //render/read
 function renderTask() {
-    
+
     //create new li with the input of the new task the user wrote.
     //for each li, create a new checkbox element and edit + trash elements
     const item = document.createElement("li");
     const itemText = document.createElement("span");
-    
+
     item.setAttribute("id", `${liId}`);
+    if (toDoParsed[i]) {
+        itemText.textContent = toDoParsed[i].value;
+        console.log("in iff");
+    }
+    else {
+        itemText.textContent = newTask.value;
+    }
+    // itemText.textContent = toDoParsed[liId].value; //enter the text value of the current task from the parsed list that's on local storage
     liId++;
-    itemText.textContent = newTask.value;
+    // itemText.textContent = newTask.value;
     const checkbox = document.createElement("input");
     checkbox.type = "checkbox";
 
@@ -74,14 +101,24 @@ function renderTask() {
     updateForm.appendChild(updateInputField);
     updateForm.appendChild(updateSubmit)
     list.appendChild(updateForm);
-
+    //adding event listener to the checkbox
     checkbox.addEventListener("click", function (event) {
         if (checkbox.checked) {
-            newTask.complete = true;
+            if (newTask) {
+                newTask.complete = true;
+            }
+            else {
+                toDoParsed[i-1].complete = true;
+            }
             item.classList.add("complete");
         }
         else {
-            newTask.complete = false;
+            if (newTask) {
+                newTask.complete = false;
+            }
+            else {
+                toDoParsed[i-1].complete = false;
+            }
             item.classList.remove("complete");
         }
     });
@@ -89,8 +126,7 @@ function renderTask() {
     toDoListCurrTask++;
 
     update.addEventListener("click", updateTask);
-    // console.log(update.parentElement.textContent);
-    trash.addEventListener("click", removeTask);
+    trash.addEventListener("click", () => removeTask(i-1, event));
 
     input.value = "";
 }
@@ -104,13 +140,12 @@ function updateTask(event) {
     inputEdit.style.display = "block";
     const submit = event.currentTarget.parentElement.nextElementSibling.firstElementChild.nextElementSibling;
     submit.style.display = "block";
-    inputEdit.style.textAlign = "center";
 
     formEdit.addEventListener("submit", function (e) {
         e.preventDefault();
-        taskToChange.innerText = inputEdit.value;
-        // console.log(inputEdit.value);
-        console.log(taskToChange.innerText);
+        if (inputEdit.value) {
+            taskToChange.innerText = inputEdit.value;
+        }
         inputEdit.style.display = "none";
         submit.style.display = "none";
     });
@@ -119,8 +154,9 @@ function updateTask(event) {
 
 //remove
 
-function removeTask(event) {
+function removeTask(i, event) {
     // event.currentTarget.parentElement.style.display = "none";
+    delete toDoList[event.currentTarget.parentElement.id]; //removing the task object from the to-do list
     let el = document.getElementById(event.currentTarget.parentElement.id);
-    el.remove();
+    el.remove(); //removing the element from the dom
 }
